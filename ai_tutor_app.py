@@ -2,8 +2,8 @@ import streamlit as st
 import openai
 import time
 
-# Set your OpenAI API key here
-openai.api_key = st.secrets["openai_api_key"]  # <-- replace with your real API key
+# Set your OpenAI API key from Streamlit Secrets
+openai.api_key = st.secrets["openai_api_key"]
 
 # Function to generate the micro-lesson
 def generate_micro_lesson(topic, difficulty):
@@ -22,15 +22,20 @@ def generate_micro_lesson(topic, difficulty):
 
     Make sure the lesson matches the {difficulty} level requirements exactly.
     """
-    response = openai.ChatCompletion.create(
-        model="gpt-4",  # or "gpt-3.5-turbo" if you don't have GPT-4 access
+
+    # Updated OpenAI v1.0 style
+    client = openai.OpenAI()
+
+    response = client.chat.completions.create(
+        model="gpt-4",  # or "gpt-3.5-turbo"
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
         max_tokens=700
     )
-    return response['choices'][0]['message']['content']
 
-# --- Streamlit App ---
+    return response.choices[0].message.content
+
+# --- Streamlit App Layout ---
 
 st.set_page_config(page_title="AI Micro-Lesson Generator", page_icon="🎓")
 
@@ -44,20 +49,21 @@ difficulty = st.selectbox("Select difficulty level:", ["Easy", "Medium", "Hard"]
 # Layout with two columns for buttons
 col1, col2 = st.columns(2)
 
-# Generate button
 with col1:
-    if st.button("Generate Lesson"):
-        if topic:
-            with st.spinner("Generating your lesson..."):
-                lesson = generate_micro_lesson(topic, difficulty)
-                st.success("Here’s your AI-generated lesson!")
-                st.markdown(lesson)
-        else:
-            st.warning("Please enter a topic first.")
-
-# Reset button
+    generate = st.button("Generate Lesson")
 with col2:
-    if st.button("Reset"):
-        st.success("Reset successful! Ready for a new topic.")
-        time.sleep(1)
-        st.rerun()
+    reset = st.button("Reset")
+
+if generate:
+    if topic:
+        with st.spinner("Generating your lesson..."):
+            lesson = generate_micro_lesson(topic, difficulty)
+            st.success("Here’s your AI-generated lesson!")
+            st.markdown(lesson)
+    else:
+        st.warning("Please enter a topic first.")
+
+if reset:
+    st.success("Reset successful! Ready for a new topic.")
+    time.sleep(1)
+    st.rerun()
