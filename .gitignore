@@ -1,0 +1,12 @@
+# Ignore secrets
+.streamlit/secrets.toml
+
+# Python junk
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VS Code settings (optional)
+.vscode/
+
