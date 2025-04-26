@@ -2,8 +2,12 @@ import streamlit as st
 import openai
 import time
 
-# Set your OpenAI API key from Streamlit Secrets
-openai.api_key = st.secrets["openai_api_key"]
+# --- Streamlit App Layout ---
+
+st.set_page_config(page_title="AI Micro-Lesson Generator", page_icon="🎓")
+
+st.title("🎓 AI Micro-Lesson Generator")
+st.write("Enter a topic and choose the difficulty level!")
 
 # Function to generate the micro-lesson
 def generate_micro_lesson(topic, difficulty):
@@ -23,24 +27,17 @@ def generate_micro_lesson(topic, difficulty):
     Make sure the lesson matches the {difficulty} level requirements exactly.
     """
 
-    # Updated OpenAI v1.0 style
-    client = openai.OpenAI()
+    # Create OpenAI client with the secret API key
+    client = openai.OpenAI(api_key=st.secrets["openai_api_key"])
 
     response = client.chat.completions.create(
-        model="gpt-4",  # or "gpt-3.5-turbo"
+        model="gpt-4",  # or "gpt-3.5-turbo" if you want cheaper
         messages=[{"role": "user", "content": prompt}],
         temperature=0.5,
         max_tokens=700
     )
 
     return response.choices[0].message.content
-
-# --- Streamlit App Layout ---
-
-st.set_page_config(page_title="AI Micro-Lesson Generator", page_icon="🎓")
-
-st.title("🎓 AI Micro-Lesson Generator")
-st.write("Enter a topic and choose the difficulty level!")
 
 # Input fields
 topic = st.text_input("Enter a topic:")
@@ -54,6 +51,7 @@ with col1:
 with col2:
     reset = st.button("Reset")
 
+# When Generate button is clicked
 if generate:
     if topic:
         with st.spinner("Generating your lesson..."):
@@ -63,7 +61,10 @@ if generate:
     else:
         st.warning("Please enter a topic first.")
 
+# When Reset button is clicked
 if reset:
     st.success("Reset successful! Ready for a new topic.")
     time.sleep(1)
+    st.rerun()
+
     st.rerun()
